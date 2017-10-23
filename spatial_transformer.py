@@ -51,6 +51,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
     """
 
     def _repeat(x, n_repeats):
+        # repeat x for n_repeats times and reshape to (-1,)
         with tf.variable_scope('_repeat'):
             rep = tf.transpose(
                 tf.expand_dims(tf.ones(shape=tf.pack([n_repeats, ])), 1), [1, 0])
@@ -59,6 +60,8 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
             return tf.reshape(x, [-1])
 
     def _interpolate(im, x, y, out_size):
+        # for the given original image x, and coordinates of (x,y), 
+        # return the pixel value of P(x,y) by interpolation.
         with tf.variable_scope('_interpolate'):
             # constants
             num_batch = tf.shape(im)[0]
@@ -162,8 +165,8 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
 
             # Transform A x (x_t, y_t, 1)^T -> (x_s, y_s)
             T_g = tf.batch_matmul(theta, grid)
-            x_s = tf.slice(T_g, [0, 0, 0], [-1, 1, -1])
-            y_s = tf.slice(T_g, [0, 1, 0], [-1, 1, -1])
+            x_s = tf.slice(T_g, [0, 0, 0], [-1, 1, -1])   # the left part of T_g
+            y_s = tf.slice(T_g, [0, 1, 0], [-1, 1, -1])   # the right part of T_g
             x_s_flat = tf.reshape(x_s, [-1])
             y_s_flat = tf.reshape(y_s, [-1])
 
